@@ -1,20 +1,27 @@
+# Usage: Load the script in the config and on the partyline do: .chanset #channel +naalinlinkit
+
 setudef flag naalinlinkit
 
 bind pubm -|- "*" naalinlinkit::handler
 
 namespace eval naalinlinkit {
-
 proc handler {nick mask hand channel arguments} {
-set inception 2009
-set year [clock format [clock seconds] -gmt true -format %Y]
-set dbfile "naalinlinkit${year}.txt"
 
+# Set desired filename here. It will be appended with year and .txt
+set filenameheader "naalinlinkit"
+
+set year [clock format [clock seconds] -gmt true -format %Y]
+set dbfile "${filenameheader}${year}.txt"
 if {![file exists $dbfile]} { set txtfile [open $dbfile w]; close $txtfile }
+set x $year
+while {[file exists "${filenameheader}${x}.txt"]} { incr x -1 }
+set inception [expr $x + 1]
+
 if {[channel get $channel naalinlinkit] && [onchan $nick $channel]} {
 	foreach item [split $arguments] {
 	if {[string match -nocase "http://?*" $item] || [string match -nocase "www.?*" $item] || [string match -nocase "https://?*" $item]} {
 		for {set x $inception} {$x <= $year} {incr x} {
-			set txtfile [open "naalinlinkit${x}.txt" r+]
+			set txtfile [open "${filenameheader}${x}.txt" r+]
 			while {![eof $txtfile]} {
 				set urlfound false 
 	                        set processline [gets $txtfile]
