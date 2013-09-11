@@ -6,7 +6,7 @@ namespace eval naalinlinkit {
 
 proc handler {nick mask hand channel arguments} {
 set inception 2009
-set year [clock format [clock seconds] -format %Y]
+set year [clock format [clock seconds] -gmt true -format %Y]
 set dbfile "naalinlinkit${year}.txt"
 
 if {![file exists $dbfile]} { set txtfile [open $dbfile w]; close $txtfile }
