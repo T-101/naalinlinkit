@@ -10,7 +10,7 @@ proc handler {nick mask hand channel arguments} {
 # Set desired filename here. It will be appended with year and .txt
 set filenameheader "naalinlinkit"
 
-set year [clock format [clock seconds] -gmt true -format %Y]
+set year [clock format [clock seconds] -format %Y]
 set dbfile "${filenameheader}${year}.txt"
 if {![file exists $dbfile]} { set txtfile [open $dbfile w]; close $txtfile }
 set x $year
@@ -41,50 +41,56 @@ if {[channel get $channel naalinlinkit] && [onchan $nick $channel]} {
 } }
 
 proc output {channel outputtime} {
-putquick "PRIVMSG $channel :w, [clock format [lindex $outputtime 0] -gmt true -format "%D %H:%M"]"
+putquick "PRIVMSG $channel :w, [clock format [lindex $outputtime 0] -format "%D %H:%M"]"
 }
 
 proc apinahandler {url test} {
-if {[lindex [split $url "/"] 2] == "apina.biz"} { set ying [regsub -all {[^0-9]} $url ""] }
-if {[lindex [split $test "/"] 2] == "apina.biz"} { set yang [regsub -all {[^0-9]} $test ""] }
-if {[lindex [split [lindex [split $url "/"] 2] "."] 2] == "apcdn"} { set ying [regsub -all {[^0-9]} [lindex [split $url "/"] end] ""] }
-if {[lindex [split [lindex [split $test "/"] 2] "."] 2] == "apcdn"} { set yang [regsub -all {[^0-9]} [lindex [split $test "/"] end] ""] }
+if {[naalinlinkit::getdomain $url] == "apina"} { set ying [regsub -all {[^0-9]} $url ""] }
+if {[naalinlinkit::getdomain $test] == "apina"} { set yang [regsub -all {[^0-9]} $test ""] }
+if {[naalinlinkit::getdomain $url] == "apcdn"} { set ying [regsub -all {[^0-9]} [lindex [split $url "/"] end] ""] }
+if {[naalinlinkit::getdomain $test] == "apcdn"} { set yang [regsub -all {[^0-9]} [lindex [split $test "/"] end] ""] }
 if {[info exists ying] && [info exists yang]} {
 	if {[string match $ying $yang]} { return true } else {return false } } else { return false }
 }
 
 proc imgurhandler {url test} {
-if {[lindex [split [lindex [split $url "//"] 2] .] end-1] == "imgur"} {set ying [lindex [split [lindex [split $url "/"] end] .] 0]}
-if {[lindex [split [lindex [split $test "//"] 2] .] end-1] == "imgur"} {set yang [lindex [split [lindex [split $test "/"] end] .] 0]}
+if {[naalinlinkit::getdomain $url] == "imgur"} {set ying [lindex [split [lindex [split $url "/"] end] .] 0]}
+if {[naalinlinkit::getdomain $test] == "imgur"} {set yang [lindex [split [lindex [split $test "/"] end] .] 0]}
 if {[info exists ying] && [info exists yang]} {
 	if {[string match $ying $yang]} { return true } else { return false } } else { return false }
 }
 
 proc kuvatonhandler {url test} {
-if {[lindex [split [lindex [split $url "//"] 2] .] end-1] == "kuvaton"} {set ying [lindex [split [lindex [split $url "/"] end] .] 0]}
-if {[lindex [split [lindex [split $test "//"] 2] .] end-1] == "kuvaton"} {set yang [lindex [split [lindex [split $test "/"] end] .] 0]}
+if {[naalinlinkit::getdomain $url] == "kuvaton"} {set ying [lindex [split [lindex [split $url "/"] end] .] 0]}
+if {[naalinlinkit::getdomain $test] == "kuvaton"} {set yang [lindex [split [lindex [split $test "/"] end] .] 0]}
 if {[info exists ying] && [info exists yang]} {
         if {[string match $ying $yang]} { return true } else { return false } } else { return false }
 }
 
 proc youtubehandler {url test} {
 set urlfound false
-if {[lindex [split [lindex [split $url "//"] 2] .] end-1] == "youtube"} {
-        foreach item [split [lindex [split $url "/"] end] "&"] {
+if {[naalinlinkit::getdomain $url] == "youtube"} {
+	foreach item [split [lindex [split $url "/"] end] "&"] {
                 if {[string match [lindex [split [lindex [split $item "="] 0] "?"] 0] watch]} {
                         set ying [lindex [split [lindex [split $item "="] 1] "?"] 0] } }
 }
-if {[lindex [split [lindex [split $test "//"] 2] .] end-1] == "youtube"} {
+if {[naalinlinkit::getdomain $test] == "youtube"} {
         foreach item [split [lindex [split $test "/"] end] "&"] {
                 if {[string match [lindex [split [lindex [split $item "="] 0] "?"] 0] watch]} {
                         set yang [lindex [split [lindex [split $item "="] 1] "?"] 0] } }
 }
 
-if {[lindex [split [lindex [split $url "//"] 2] .] end-1] == "youtu"} { set ying [lindex [split $url "/"] end] }
-if {[lindex [split [lindex [split $test "//"] 2] .] end-1] == "youtu"} { set yang [lindex [split $test "/"] end] }
+if {[naalinlinkit::getdomain $url] == "youtu"} { set ying [lindex [split $url "/"] end] }
+if {[naalinlinkit::getdomain $test] == "youtu"} { set yang [lindex [split $test "/"] end] }
 
 if {[info exists ying] && [info exists yang]} {
         if {[string match $ying $yang]} {return true } else {return false} } else {return false }
+}
+
+proc getdomain {url} {
+if {[string tolower [string index $url 0]] == "w"} { return [lindex [split [lindex [split $url "/"] 0] .] end-1] }
+if {[string tolower [string index $url 0]] == "h"} { return [lindex [split [lindex [split $url "//"] 2] .] end-1] }
+
 }
 
 }
