@@ -60,6 +60,15 @@ if {[info exists ying] && [info exists yang]} {
 	if {[string match $ying $yang]} { return true } else { return false } } else { return false }
 }
 
+proc 4chanhandler {url test} {
+set domains { 4chan kuvalauta lauta kotilauta northpole imagechan }
+foreach item $domains {
+	if {[string match $item [naalinlinkit::getdomain $url]} { 
+
+	}
+}
+}
+
 proc kuvatonhandler {url test} {
 if {[naalinlinkit::getdomain $url] == "kuvaton"} {set ying [lindex [split [lindex [split $url "/"] end] .] 0]}
 if {[naalinlinkit::getdomain $test] == "kuvaton"} {set yang [lindex [split [lindex [split $test "/"] end] .] 0]}
@@ -90,7 +99,6 @@ if {[info exists ying] && [info exists yang]} {
 proc getdomain {url} {
 if {[string tolower [string index $url 0]] == "w"} { return [lindex [split [lindex [split $url "/"] 0] .] end-1] }
 if {[string tolower [string index $url 0]] == "h"} { return [lindex [split [lindex [split $url "//"] 2] .] end-1] }
-
 }
 
 }
