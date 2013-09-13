@@ -79,14 +79,12 @@ if {[info exists ying] && [info exists yang]} {
 proc youtubehandler {url test} {
 set urlfound false
 if {[naalinlinkit::getdomain $url] == "youtube"} {
-	foreach item [split [lindex [split $url "/"] end] "&"] {
-                if {[string match [lindex [split [lindex [split $item "="] 0] "?"] 0] watch]} {
-                        set ying [lindex [split [lindex [split $item "="] 1] "?"] 0] } }
+	foreach item [join [split [split $url ?] &]] {
+		if {[string match -nocase "v=*" $item]} {set ying [string range $item 2 end]} }
 }
 if {[naalinlinkit::getdomain $test] == "youtube"} {
-        foreach item [split [lindex [split $test "/"] end] "&"] {
-                if {[string match [lindex [split [lindex [split $item "="] 0] "?"] 0] watch]} {
-                        set yang [lindex [split [lindex [split $item "="] 1] "?"] 0] } }
+	foreach item [join [split [split $test ?] &]] {
+		if {[string match -nocase "v=*" $item]} {set yang [string range $item 2 end]} }
 }
 
 if {[naalinlinkit::getdomain $url] == "youtu"} { set ying [lindex [split $url "/"] end] }
