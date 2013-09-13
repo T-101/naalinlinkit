@@ -1,12 +1,21 @@
 # Usage: Load the script in the config and on the partyline do: .chanset #channel +naalinlinkit
 
-setudef flag naalinlinkit
+set currentversion 2.01
 
-bind pubm -|- "*" naalinlinkit::handler
+# Version History
+# 1.0  - First edition, code was destroyed by server hdd failure
+# 2.0  - Second edition, code written from scratch and moved to GitHub
+# 2.01 - Added handlers for some sites that have multiple different urls for same content
 
 namespace eval naalinlinkit {
+
+setudef flag naalinlinkit
+bind pubm -|- "*" naalinlinkit::handler
+
 proc handler {nick mask hand channel arguments} {
 
+# Some basic configuration stuff here
+#
 # Set desired filename here. It will be appended with year and .txt
 set filenameheader "naalinlinkit"
 
@@ -23,7 +32,7 @@ if {[channel get $channel naalinlinkit] && [onchan $nick $channel]} {
 		for {set x $inception} {$x <= $year} {incr x} {
 			set txtfile [open "${filenameheader}${x}.txt" r+]
 			while {![eof $txtfile]} {
-				set urlfound false 
+				set urlfound false
 	                        set processline [gets $txtfile]
 				if {[naalinlinkit::apinahandler $item [lindex $processline 2]]} { set urlfound true }
 				if {[naalinlinkit::imgurhandler $item [lindex $processline 2]]} { set urlfound true }
@@ -77,16 +86,14 @@ if {[info exists ying] && [info exists yang]} {
 }
 
 proc youtubehandler {url test} {
-set urlfound false
 if {[naalinlinkit::getdomain $url] == "youtube"} {
 	foreach item [join [split [split $url ?] &]] {
 		if {[string match -nocase "v=*" $item]} {set ying [string range $item 2 end]} }
 }
 if {[naalinlinkit::getdomain $test] == "youtube"} {
 	foreach item [join [split [split $test ?] &]] {
-		if {[string match -nocase "v=*" $item]} {set yang [string range $item 2 end]} }
+		if {[string match -nocase "v=*" $item]} {set yang [string range $item 2 end]} }
 }
-
 if {[naalinlinkit::getdomain $url] == "youtu"} { set ying [lindex [split $url "/"] end] }
 if {[naalinlinkit::getdomain $test] == "youtu"} { set yang [lindex [split $test "/"] end] }
 
@@ -101,4 +108,4 @@ if {[string tolower [string index $url 0]] == "h"} { return [lindex [split [lind
 
 }
 
-putlog "Naalinlinkit V2.0 by T-101"
+putlog "Naalinlinkit V${currentversion} by T-101"
