@@ -1,11 +1,12 @@
 # Usage: Load the script in the config and on the partyline do: .chanset #channel +naalinlinkit
 
-set currentversion 2.01
+set currentversion 2.02
 
 # Version History
 # 1.0  - First edition, code was destroyed by server hdd failure
 # 2.0  - Second edition, code written from scratch and moved to GitHub
 # 2.01 - Added handlers for some sites that have multiple different urls for same content
+# 2.02 - Added handler to disregard tailing "/" or "#"
 
 namespace eval naalinlinkit {
 
@@ -33,14 +34,15 @@ if {[channel get $channel naalinlinkit] && [onchan $nick $channel]} {
 			set txtfile [open "${filenameheader}${x}.txt" r+]
 			while {![eof $txtfile]} {
 				set urlfound false
-	                        set processline [gets $txtfile]
-				if {[naalinlinkit::apinahandler $item [lindex $processline 2]]} { set urlfound true }
-				if {[naalinlinkit::imgurhandler $item [lindex $processline 2]]} { set urlfound true }
-				if {[naalinlinkit::kuvatonhandler $item [lindex $processline 2]]} { set urlfound true }
-				if {[naalinlinkit::youtubehandler $item [lindex $processline 2]]} { set urlfound true }
-        	                if {[string match -nocase $item [lindex $processline 2]]} {set urlfound true}
+				set testline [tailhandler $item]
+	                        set processline [tailhandler [gets $txtfile]]
+				if {[naalinlinkit::apinahandler $testline [lindex $processline 2]]} { set urlfound true }
+				if {[naalinlinkit::imgurhandler $testline [lindex $processline 2]]} { set urlfound true }
+				if {[naalinlinkit::kuvatonhandler $testline [lindex $processline 2]]} { set urlfound true }
+				if {[naalinlinkit::youtubehandler $testline [lindex $processline 2]]} { set urlfound true }
+        	                if {[string match -nocase $testline [lindex $processline 2]]} {set urlfound true}
 				if {$urlfound} {naalinlinkit::output $channel $processline}
-	               	        unset processline
+	               	        unset processline testline
 			}
 			if {$x == $year} {puts $txtfile "[clock seconds] $nick $item"}
 			close $txtfile
@@ -52,6 +54,8 @@ if {[channel get $channel naalinlinkit] && [onchan $nick $channel]} {
 proc output {channel outputtime} {
 putquick "PRIVMSG $channel :w, [clock format [lindex $outputtime 0] -format "%D %H:%M"]"
 }
+
+proc tailhandler {url} { if {[string index $url end] == "/" || [string index $url end] == "#"} {return [string range $url 0 end-1]} else {return $url} }
 
 proc apinahandler {url test} {
 if {[naalinlinkit::getdomain $url] == "apina"} { set ying [regsub -all {[^0-9]} $url ""] }
